@@ -1,0 +1,21 @@
+# IDEs
+.vscode/
+.idea/
+.DS_Store
+
+# Environments
+.env
+*.env
+
+# Dependencies
+node_modules/
+dist/
+build/
+__pycache__/
+*.pyc
+
+# Docker
+.docker/
+
+# Logs
+*.log

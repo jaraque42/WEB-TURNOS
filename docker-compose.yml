@@ -1,0 +1,62 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:15
+    container_name: turnos_db
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-admin1234}
+      POSTGRES_DB: ${POSTGRES_DB:-turnos_db}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    # Puerto no expuesto al host para evitar conflictos con PostgreSQL local
+    # ports:
+    #   - "5432:5432"
+    networks:
+      - turnos_net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d turnos_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: turnos_backend
+    restart: always
+    env_file:
+      - .env
+    ports:
+      - "8081:8081"
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+    networks:
+      - turnos_net
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8081 --reload
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: turnos_frontend
+    restart: always
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    networks:
+      - turnos_net
+
+volumes:
+  postgres_data:
+
+networks:
+  turnos_net:
+    driver: bridge

@@ -1,0 +1,11 @@
+fecha,correo,codigo_turno,ubicacion,observaciones
+2026-03-10,daniela.acosta@empresa.com,M-T123-D63,Terminal 1,Prueba import flexible 1
+2026-03-10,tomas.prieto@empresa.com,M-T4-J49,Terminal 2,Prueba import flexible 2
+2026-03-10,nuria.blanco@empresa.com,M-T4S-M40,Terminal 3,Prueba import flexible 3
+2026-03-10,rafael.arias@empresa.com,T-T123-B25,Terminal 1,Prueba import flexible 4
+2026-03-11,sara.vidal@empresa.com,M-T123-D63,Terminal 2,Prueba import flexible 5
+2026-03-11,pablo.cabrera@empresa.com,M-T4-J49,Terminal 3,Prueba import flexible 6
+2026-03-11,alicia.marin@empresa.com,M-T4S-M40,Terminal 1,Prueba import flexible 7
+2026-03-11,mateo.ordonez@empresa.com,T-T123-B25,Terminal 2,Prueba import flexible 8
+2026-03-12,lorena.pascual@empresa.com,M-T123-D63,Terminal 3,Prueba import flexible 9
+2026-03-12,victor.guillen@empresa.com,M-T4-J49,Terminal 1,Prueba import flexible 10

@@ -1,0 +1,18 @@
+date,email,shift_code,location,notes
+2026-03-01,pmr.agent1@empresa.com,PMR_M,Terminal 1,Ruta matutina PMR zona A
+2026-03-01,pmr.agent2@empresa.com,PMR_T,Terminal 2,Traslados interterminal PMR
+2026-03-01,pmr.agent3@empresa.com,PMR_N,Terminal 1,Refuerzos nocturnos PMR
+2026-03-02,pmr.agent1@empresa.com,PMR_T,Terminal 3,Relevos tarde PMR T3
+2026-03-02,pmr.agent2@empresa.com,PMR_M,Terminal 1,Primera hora sillas eléctricas
+2026-03-02,pmr.agent4@empresa.com,PMR_M,Terminal 2,Apoyo llegadas internacionales PMR
+2026-03-03,pmr.agent1@empresa.com,PMR_M,Terminal 1,Refuerzo picos de mañana
+2026-03-03,pmr.agent3@empresa.com,PMR_T,Terminal 2,Asignación de tarde PMR
+2026-03-03,pmr.agent5@empresa.com,PMR_M,Terminal 3,Nuevas incorporaciones PMR
+2026-03-04,pmr.agent2@empresa.com,PMR_T,Terminal 1,Traslados con rampa portátil
+2026-03-04,pmr.agent3@empresa.com,PMR_T,Terminal 2,Itinerarios asistidos PMR
+2026-03-05,pmr.agent1@empresa.com,PMR_N,Terminal 1,Guardia nocturna PMR
+2026-03-05,pmr.agent4@empresa.com,PMR_M,Terminal 2,Refuerzo primera hora
+2026-03-05,pmr.agent6@empresa.com,PMR_T,Terminal 3,Asignación polivalente PMR
+2026-03-06,pmr.agent2@empresa.com,PMR_M,Terminal 1,Alta demanda sábado mañana
+2026-03-06,pmr.agent5@empresa.com,PMR_T,Terminal 2,Soporte pasarelas
+2026-03-06,pmr.agent6@empresa.com,PMR_T,Terminal 3,Asistencia embarques PMR
