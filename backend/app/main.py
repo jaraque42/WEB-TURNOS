@@ -236,6 +236,21 @@ app.include_router(imports.router, prefix="/api/v1")
 app.include_router(system.router, prefix="/api/v1")
 
 
+@app.get("/api/v1/system/setup-db")
+async def setup_db():
+    try:
+        # Forzar la creación de tablas
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
+        
+        # Ejecutar el seed
+        await seed_initial_data()
+        
+        return {"status": "success", "message": "Base de datos inicializada correctamente. Ya puedes intentar entrar con admin / 1234"}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
+
+
 @app.get("/")
 async def root():
     return {
@@ -243,6 +258,7 @@ async def root():
         "version": "0.1.0",
         "docs": "/docs",
         "status": "ok",
+        "setup_link": "/api/v1/system/setup-db"
     }
 
 
