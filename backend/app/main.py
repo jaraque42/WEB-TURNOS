@@ -15,11 +15,15 @@ import app.models  # noqa: F401
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Al arrancar: crear tablas y seed inicial
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
-
-    await seed_initial_data()
+    # En entorno serverless el lifespan puede fallar si la BD no está lista.
+    # Lo envolvemos en try/except para que la función no crashee al arrancar.
+    try:
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
+        await seed_initial_data()
+    except Exception as e:
+        print(f"⚠️ ADVERTENCIA: No se pudo inicializar la BD al arrancar: {e}")
+        print("Usa /api/v1/system/setup-db para inicializarla manualmente.")
     yield
 
 
