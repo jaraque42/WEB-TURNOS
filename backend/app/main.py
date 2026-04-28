@@ -239,16 +239,39 @@ app.include_router(system.router, prefix="/api/v1")
 @app.get("/api/v1/system/setup-db")
 async def setup_db():
     try:
-        # Forzar la creación de tablas
         async with engine.begin() as conn:
             await conn.run_sync(Base.metadata.create_all)
-        
-        # Ejecutar el seed
         await seed_initial_data()
-        
-        return {"status": "success", "message": "Base de datos inicializada correctamente. Ya puedes intentar entrar con admin / 1234"}
+        return {"status": "success", "message": "Base de datos inicializada. Usa admin / 1234"}
     except Exception as e:
-        return {"status": "error", "message": str(e)}
+        import traceback
+        return {"status": "error", "message": str(e), "detail": traceback.format_exc()}
+
+
+@app.get("/api/v1/system/db-ping")
+async def db_ping():
+    """Diagnóstico: prueba la conexión a la base de datos y muestra el error exacto."""
+    from sqlalchemy import text
+    try:
+        url_usada = settings.ASYNC_DATABASE_URL
+        # Ocultar credenciales para el log
+        url_log = url_usada.split("@")[-1] if "@" in url_usada else url_usada
+        async with engine.connect() as conn:
+            result = await conn.execute(text("SELECT version()"))
+            version = result.scalar()
+        return {
+            "status": "ok",
+            "db_version": version,
+            "host": url_log,
+        }
+    except Exception as e:
+        import traceback
+        return {
+            "status": "error",
+            "message": str(e),
+            "type": type(e).__name__,
+            "detail": traceback.format_exc(),
+        }
 
 
 @app.get("/")
@@ -258,7 +281,8 @@ async def root():
         "version": "0.1.0",
         "docs": "/docs",
         "status": "ok",
-        "setup_link": "/api/v1/system/setup-db"
+        "diagnostico": "/api/v1/system/db-ping",
+        "setup": "/api/v1/system/setup-db",
     }
 
 
