@@ -23,8 +23,10 @@ class Settings(BaseSettings):
             url = url.replace("postgresql://", "postgresql+asyncpg://", 1)
         return url
 
-    class Config:
-        env_file = ".env"
+    model_config = {
+        "env_file": ".env",
+        "extra": "ignore",  # Ignorar variables de entorno desconocidas (ej: POSTGRES_USER de Docker)
+    }
 
 
 settings = Settings()
