@@ -12,3 +12,4 @@ python-multipart
 email-validator
 httpx
 openpyxl
+boto3==1.34.100

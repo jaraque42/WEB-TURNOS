@@ -34,3 +34,5 @@ venv/
 ENV/
 backend/test.db
 backend/alembic/__pycache__
+.vercel
+.env*.local
