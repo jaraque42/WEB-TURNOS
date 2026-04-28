@@ -14,6 +14,15 @@ class Settings(BaseSettings):
     AGENT_WORKDIR: str = "/app"
     AGENT_PID_FILE: str = "/tmp/turnos_agent.pid"
 
+    @property
+    def ASYNC_DATABASE_URL(self) -> str:
+        url = self.DATABASE_URL
+        if url.startswith("postgres://"):
+            url = url.replace("postgres://", "postgresql+asyncpg://", 1)
+        elif url.startswith("postgresql://") and "+asyncpg" not in url:
+            url = url.replace("postgresql://", "postgresql+asyncpg://", 1)
+        return url
+
     class Config:
         env_file = ".env"
 
