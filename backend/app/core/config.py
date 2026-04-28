@@ -21,6 +21,9 @@ class Settings(BaseSettings):
             url = url.replace("postgres://", "postgresql+asyncpg://", 1)
         elif url.startswith("postgresql://") and "+asyncpg" not in url:
             url = url.replace("postgresql://", "postgresql+asyncpg://", 1)
+        # asyncpg no acepta ?sslmode=require, necesita ?ssl=require
+        url = url.replace("?sslmode=require", "?ssl=require")
+        url = url.replace("&sslmode=require", "&ssl=require")
         return url
 
     model_config = {
