@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
 
 from app.core.config import settings
-from app.core.database import engine, Base
+from app.core.database import engine, Base, reset_vercel_oidc_token, set_vercel_oidc_token
 from app.core.security import get_password_hash
 from app.routers import auth, users, roles, permissions, employees, shifts, assignments, business_rules, imports, system
 
@@ -217,6 +217,16 @@ app = FastAPI(
     version="0.1.0",
     lifespan=lifespan,
 )
+
+
+@app.middleware("http")
+async def vercel_oidc_token_middleware(request, call_next):
+    token_ref = set_vercel_oidc_token(request.headers.get("x-vercel-oidc-token"))
+    try:
+        return await call_next(request)
+    finally:
+        reset_vercel_oidc_token(token_ref)
+
 
 # CORS
 app.add_middleware(

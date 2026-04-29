@@ -17,9 +17,17 @@ class Settings(BaseSettings):
     AGENT_PID_FILE: str = "/tmp/turnos_agent.pid"
 
     @property
+    def USE_AWS_IAM_AUTH(self) -> bool:
+        return bool(
+            os.environ.get("PGHOST")
+            and os.environ.get("AWS_ROLE_ARN")
+            and not os.environ.get("PGPASSWORD")
+        )
+
+    @property
     def ASYNC_DATABASE_URL(self) -> str:
         # 1. Si Vercel AWS Integration configuró PGHOST, armamos la URL directamente.
-        # Si el usuario configuró PGPASSWORD en Vercel, lo usamos.
+        # Si no hay contraseña pero sí OIDC/AWS Role, database.py usará IAM Auth.
         if os.environ.get("PGHOST"):
             db_host = os.environ.get("PGHOST")
             db_port = os.environ.get("PGPORT", "5432")
@@ -31,10 +39,6 @@ class Settings(BaseSettings):
                 # Si hay contraseña, la incluimos
                 return f"postgresql+asyncpg://{db_user}:{urllib.parse.quote_plus(db_pass)}@{db_host}:{db_port}/{db_name}?ssl=require"
             else:
-                # AWS IAM requiere token, pero en Vercel Serverless el token OIDC viene en el header de cada petición.
-                # Como SQLAlchemy se inicializa globalmente, no podemos inyectar el header aquí fácilmente.
-                # Si intentamos conectar sin contraseña, fallará en la petición si IAM es obligatorio.
-                # Recomendación para el usuario: crear la variable PGPASSWORD en Vercel.
                 return f"postgresql+asyncpg://{db_user}@{db_host}:{db_port}/{db_name}?ssl=require"
 
         # 2. Si no hay PGHOST, intentamos usar DATABASE_URL

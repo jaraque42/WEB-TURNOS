@@ -28,6 +28,7 @@ __pycache__/
 *.py[cod]
 *$py.class
 .env
+.env.vercel
 .venv
 env/
 venv/

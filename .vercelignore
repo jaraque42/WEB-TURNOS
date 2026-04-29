@@ -1,0 +1,9 @@
+.env
+.env.*
+*.log
+logs.json
+test_run.py
+test_url.py
+test_sqlalchemy_url.py
+v_logs.txt
+vercel_logs.txt
