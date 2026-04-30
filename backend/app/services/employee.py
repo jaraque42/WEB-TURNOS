@@ -198,7 +198,11 @@ async def create_employee(db: AsyncSession, data: EmployeeCreate) -> Employee:
         user_id=data.user_id,
     )
     db.add(emp)
-    await db.commit()
+    try:
+        await db.commit()
+    except Exception as e:
+        await db.rollback()
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
 
     # Refrescar con relaciones cargadas
     return await get_employee_by_id(db, emp.id)

@@ -341,6 +341,32 @@ async def db_ping():
         }
 
 
+@app.get("/api/v1/system/db-schema-debug")
+async def db_schema_debug():
+    """Diagnóstico: muestra las columnas de la tabla employees en la base de datos."""
+    from sqlalchemy import text
+    try:
+        async with engine.connect() as conn:
+            result = await conn.execute(text("""
+                SELECT column_name, data_type, is_nullable 
+                FROM information_schema.columns 
+                WHERE table_name = 'employees'
+            """))
+            columns = [dict(row._mapping) for row in result]
+        return {
+            "status": "ok",
+            "table": "employees",
+            "columns": columns,
+        }
+    except Exception as e:
+        import traceback
+        return {
+            "status": "error",
+            "message": str(e),
+            "detail": traceback.format_exc(),
+        }
+
+
 @app.get("/")
 async def root():
     return {
