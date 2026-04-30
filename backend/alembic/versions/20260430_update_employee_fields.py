@@ -14,23 +14,31 @@ branch_labels = None
 depends_on = None
 
 def upgrade() -> None:
-    # 1. Añadir full_name
-    op.add_column("employees", sa.Column("full_name", sa.String(length=200), nullable=True))
+    # 1. Añadir full_name y migrar datos
+    with op.batch_alter_table("employees") as batch_op:
+        batch_op.add_column(sa.Column("full_name", sa.String(length=200), nullable=True))
     
-    # 2. Migrar datos
-    op.execute("UPDATE employees SET full_name = first_name || ' ' || last_name")
+    op.execute(
+        """
+        UPDATE employees
+        SET full_name = NULLIF(
+            BTRIM(COALESCE(first_name, '') || ' ' || COALESCE(last_name, '')),
+            ''
+        )
+        """
+    )
+    op.execute("UPDATE employees SET full_name = 'Sin nombre' WHERE full_name IS NULL")
     
-    # 3. Hacer full_name no nulo
-    op.alter_column("employees", "full_name", nullable=False)
-
-    # 4. Eliminar columnas viejas
-    op.drop_column("employees", "first_name")
-    op.drop_column("employees", "last_name")
-    op.drop_column("employees", "address")
+    # 2. Hacer full_name no nulo y eliminar columnas viejas
+    with op.batch_alter_table("employees") as batch_op:
+        batch_op.alter_column("full_name", nullable=False)
+        batch_op.drop_column("first_name")
+        batch_op.drop_column("last_name")
+        batch_op.drop_column("address")
 
 def downgrade() -> None:
-    op.add_column("employees", sa.Column("first_name", sa.String(length=100), nullable=True))
-    op.add_column("employees", sa.Column("last_name", sa.String(length=100), nullable=True))
-    op.add_column("employees", sa.Column("address", sa.String(length=255), nullable=True))
-    
-    op.drop_column("employees", "full_name")
+    with op.batch_alter_table("employees") as batch_op:
+        batch_op.add_column(sa.Column("first_name", sa.String(length=100), nullable=True))
+        batch_op.add_column(sa.Column("last_name", sa.String(length=100), nullable=True))
+        batch_op.add_column(sa.Column("address", sa.String(length=255), nullable=True))
+        batch_op.drop_column("full_name")

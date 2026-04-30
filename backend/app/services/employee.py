@@ -394,6 +394,7 @@ async def bulk_create_employees(
                 email=emp_in.email,
                 document_number=emp_in.document_number,
                 phone=emp_in.phone,
+                location=emp_in.location,
                 hire_date=emp_in.hire_date,
                 category_id=emp_in.category_id,
                 agent_type_id=emp_in.agent_type_id,

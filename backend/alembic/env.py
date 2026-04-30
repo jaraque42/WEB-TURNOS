@@ -9,9 +9,14 @@ from alembic import context
 
 # Importar modelos para que Alembic los detecte
 from app.core.database import Base
+from app.core.config import settings
 import app.models  # noqa: F401
 
 config = context.config
+
+# Priorizar la URL de entorno (Vercel/Neon/etc.) para evitar migrar por error
+# una DB local hardcodeada en alembic.ini.
+config.set_main_option("sqlalchemy.url", settings.ASYNC_DATABASE_URL)
 
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
