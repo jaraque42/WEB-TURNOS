@@ -31,25 +31,26 @@ async def ensure_employee_schema_compatibility():
 
         if "full_name" not in columns:
             await conn.execute(text("ALTER TABLE employees ADD COLUMN full_name VARCHAR(200)"))
-            if "first_name" in columns or "last_name" in columns:
-                await conn.execute(
-                    text(
-                        """
-                        UPDATE employees
-                        SET full_name = NULLIF(
-                            BTRIM(COALESCE(first_name, '') || ' ' || COALESCE(last_name, '')),
-                            ''
-                        )
-                        WHERE full_name IS NULL
-                        """
-                    )
-                )
-                try:
-                    await conn.execute(text("ALTER TABLE employees ALTER COLUMN first_name DROP NOT NULL"))
-                    await conn.execute(text("ALTER TABLE employees ALTER COLUMN last_name DROP NOT NULL"))
-                except Exception as e:
-                    print("Could not drop NOT NULL constraint on first_name/last_name:", e)
             await conn.execute(text("UPDATE employees SET full_name = 'Sin nombre' WHERE full_name IS NULL"))
+
+        if "first_name" in columns or "last_name" in columns:
+            await conn.execute(
+                text(
+                    """
+                    UPDATE employees
+                    SET full_name = NULLIF(
+                        BTRIM(COALESCE(first_name, '') || ' ' || COALESCE(last_name, '')),
+                        ''
+                    )
+                    WHERE full_name IS NULL
+                    """
+                )
+            )
+            try:
+                await conn.execute(text("ALTER TABLE employees ALTER COLUMN first_name DROP NOT NULL"))
+                await conn.execute(text("ALTER TABLE employees ALTER COLUMN last_name DROP NOT NULL"))
+            except Exception as e:
+                print("Could not drop NOT NULL constraint on first_name/last_name:", e)
 
         if "location" not in columns:
             await conn.execute(text("ALTER TABLE employees ADD COLUMN location VARCHAR(150)"))
