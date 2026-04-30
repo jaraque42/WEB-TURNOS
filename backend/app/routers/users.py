@@ -2,8 +2,6 @@ from typing import List
 from uuid import UUID
 import csv
 import io
-import re
-import unicodedata
 
 from fastapi import APIRouter, Depends, File, UploadFile, HTTPException, status
 from sqlalchemy import select
@@ -111,46 +109,16 @@ async def bulk_create_users(
     )
 
 
-_ALIAS_MAP = {
-    "username": {"username", "usuario", "user", "login", "id_usuario"},
-    "email": {"email", "correo", "mail", "e_mail", "user_email"},
-    "full_name": {"full_name", "nombre", "nombre_completo", "nombrecompleto", "name", "display_name"},
-    "password": {"password", "contrasena", "clave", "pass", "pwd"},
-    "role_name": {"role_name", "rol", "tipo_usuario", "perfil", "role", "user_role"},
-    "is_superuser": {"is_superuser", "superusuario", "admin", "es_admin", "es_superuser", "superuser"},
-}
-
-def _normalize_key(key: str) -> str:
-    text = unicodedata.normalize("NFKD", str(key)).encode("ascii", "ignore").decode("ascii")
-    text = re.sub(r"[^a-zA-Z0-9]+", "_", text.strip().lower())
-    return re.sub(r"_+", "_", text).strip("_")
-
-def _canonical_key(raw_key: str) -> str:
-    nk = _normalize_key(raw_key)
-    for canonical, aliases in _ALIAS_MAP.items():
-        if nk in aliases:
-            return canonical
-    return nk
-
-def _normalize_row(row: dict) -> dict:
-    normalized: dict = {}
-    for k, v in row.items():
-        if k is None:
-            continue
-        ck = _canonical_key(k)
-        val = v.strip() if isinstance(v, str) else v
-        if ck not in normalized or normalized[ck] in (None, ""):
-            normalized[ck] = val
-    return normalized
-
 @router.post("/upload-csv/", response_model=UserBulkResult, status_code=201)
 async def upload_users_csv(
     file: UploadFile = File(...),
     db: AsyncSession = Depends(get_db),
-    _: User = Depends(require_permission("users:create")),
+    _: User = Depends(get_current_superuser),
 ):
     """
-    Subir un CSV/XLSX con usuarios. Soporta cabeceras flexibles (español/inglés).
+    Subir un CSV con usuarios. Formato esperado:
+    username,email,full_name,password,role_name,is_superuser
+    jperez,jperez@example.com,Juan Pérez,Pass1234,Admin,false
     """
     if not (file.filename.endswith('.csv') or file.filename.endswith('.xlsx')):
         raise HTTPException(
@@ -200,8 +168,7 @@ async def upload_users_csv(
     users_to_create = []
     parse_errors = []
 
-    for idx, raw_row in enumerate(csv_reader, start=2):  # start=2 porque la fila 1 es el encabezado
-        row = _normalize_row(raw_row)
+    for idx, row in enumerate(csv_reader, start=2):  # start=2 porque la fila 1 es el encabezado
         try:
             # Validar campos requeridos
             required_fields = ['username', 'email', 'full_name', 'password']

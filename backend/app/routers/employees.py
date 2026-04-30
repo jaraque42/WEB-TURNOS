@@ -175,43 +175,6 @@ async def bulk_create_employees(
     )
 
 
-import re
-import unicodedata
-
-_ALIAS_MAP = {
-    "full_name": {"full_name", "nombre", "nombre_completo", "nombrecompleto", "name", "employee_name"},
-    "document_number": {"document_number", "documento", "dni", "nie", "nif", "document_number", "documentnumber", "cedula"},
-    "email": {"email", "correo", "mail", "e_mail", "employee_email"},
-    "phone": {"phone", "telefono", "tel", "celular", "mobile"},
-    "location": {"location", "ubicacion", "site", "sede", "base", "posicion"},
-    "hire_date": {"hire_date", "fecha_ingreso", "fecha_alta", "fecha", "date", "hiredate"},
-    "category_name": {"category_name", "puesto", "categoria", "puesto_asignado", "category", "role"},
-    "agent_type_name": {"agent_type_name", "tipo_contrato", "tipo_agente", "tipo", "agent_type", "contract_type"},
-}
-
-def _normalize_key(key: str) -> str:
-    text = unicodedata.normalize("NFKD", str(key)).encode("ascii", "ignore").decode("ascii")
-    text = re.sub(r"[^a-zA-Z0-9]+", "_", text.strip().lower())
-    return re.sub(r"_+", "_", text).strip("_")
-
-def _canonical_key(raw_key: str) -> str:
-    nk = _normalize_key(raw_key)
-    for canonical, aliases in _ALIAS_MAP.items():
-        if nk in aliases:
-            return canonical
-    return nk
-
-def _normalize_row(row: dict) -> dict:
-    normalized: dict = {}
-    for k, v in row.items():
-        if k is None:
-            continue
-        ck = _canonical_key(k)
-        val = v.strip() if isinstance(v, str) else v
-        if ck not in normalized or normalized[ck] in (None, ""):
-            normalized[ck] = val
-    return normalized
-
 @router.post("/employees/upload-csv/", response_model=EmployeeBulkResult, status_code=201)
 async def upload_employees_csv(
     file: UploadFile = File(...),
@@ -219,7 +182,9 @@ async def upload_employees_csv(
     _: User = Depends(require_permission("employees:create")),
 ):
     """
-    Subir un CSV/XLSX con empleados. Soporta cabeceras flexibles (español/inglés).
+    Subir un CSV con empleados. Formato esperado:
+    full_name,document_number,email,phone,location,hire_date,category_name,agent_type_name
+    Juan Pérez,12345678,jperez@example.com,555-1234,T123:D63,2025-01-15,Full-time,MJ-F
     """
     if not (file.filename.endswith('.csv') or file.filename.endswith('.xlsx')):
         raise HTTPException(
@@ -272,21 +237,20 @@ async def upload_employees_csv(
     employees_to_create = []
     parse_errors = []
 
-    for idx, raw_row in enumerate(csv_reader, start=2):  # start=2 porque la fila 1 es el encabezado
-        row = _normalize_row(raw_row)
+    for idx, row in enumerate(csv_reader, start=2):  # start=2 porque la fila 1 es el encabezado
         try:
             # Validar campos requeridos
             required_fields = ['full_name', 'document_number', 'hire_date']
             missing = [f for f in required_fields if not row.get(f)]
             if missing:
-                parse_errors.append(f"Fila {idx}: Faltan campos obligatorios. Asegúrese de que las columnas tengan nombres correctos (ej: nombre, dni, fecha)")
+                parse_errors.append(f"Fila {idx}: Faltan campos: {', '.join(missing)}")
                 continue
 
             # Parsear hire_date
-            from app.routers.imports import _parse_date
-            hire_date = _parse_date(row['hire_date'])
-            if not hire_date:
-                parse_errors.append(f"Fila {idx}: Fecha de contratación '{row['hire_date']}' inválida. Usa formato YYYY-MM-DD")
+            try:
+                hire_date = date_type.fromisoformat(row['hire_date'].strip())
+            except ValueError:
+                parse_errors.append(f"Fila {idx}: Fecha de contratación inválida. Usa formato YYYY-MM-DD")
                 continue
 
             # Obtener category_id si se especificó category_name
