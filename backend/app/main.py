@@ -44,6 +44,11 @@ async def ensure_employee_schema_compatibility():
                         """
                     )
                 )
+                try:
+                    await conn.execute(text("ALTER TABLE employees ALTER COLUMN first_name DROP NOT NULL"))
+                    await conn.execute(text("ALTER TABLE employees ALTER COLUMN last_name DROP NOT NULL"))
+                except Exception as e:
+                    print("Could not drop NOT NULL constraint on first_name/last_name:", e)
             await conn.execute(text("UPDATE employees SET full_name = 'Sin nombre' WHERE full_name IS NULL"))
 
         if "location" not in columns:
