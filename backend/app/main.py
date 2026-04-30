@@ -2,7 +2,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy import text
+from sqlalchemy import inspect, text
 
 from app.core.config import settings
 from app.core.database import engine, Base, reset_vercel_oidc_token, set_vercel_oidc_token
@@ -13,6 +13,49 @@ from app.routers import auth, users, roles, permissions, employees, shifts, assi
 import app.models  # noqa: F401
 
 
+async def ensure_employee_schema_compatibility():
+    """
+    Auto-repara columnas de employees en despliegues donde no corrieron migraciones.
+    Evita romper el alta de empleados al pasar de first_name/last_name a full_name.
+    """
+    async with engine.begin() as conn:
+        def _get_employee_columns(sync_conn):
+            inspector = inspect(sync_conn)
+            if "employees" not in inspector.get_table_names():
+                return set()
+            return {col["name"] for col in inspector.get_columns("employees")}
+
+        columns = await conn.run_sync(_get_employee_columns)
+        if not columns:
+            return
+
+        if "full_name" not in columns:
+            await conn.execute(text("ALTER TABLE employees ADD COLUMN full_name VARCHAR(200)"))
+            if "first_name" in columns or "last_name" in columns:
+                await conn.execute(
+                    text(
+                        """
+                        UPDATE employees
+                        SET full_name = NULLIF(
+                            BTRIM(COALESCE(first_name, '') || ' ' || COALESCE(last_name, '')),
+                            ''
+                        )
+                        WHERE full_name IS NULL
+                        """
+                    )
+                )
+            await conn.execute(text("UPDATE employees SET full_name = 'Sin nombre' WHERE full_name IS NULL"))
+
+        if "location" not in columns:
+            await conn.execute(text("ALTER TABLE employees ADD COLUMN location VARCHAR(150)"))
+
+        try:
+            await conn.execute(text("ALTER TABLE employees ALTER COLUMN full_name SET NOT NULL"))
+        except Exception:
+            # En motores sin soporte ALTER COLUMN (ej. sqlite) no detenemos el arranque.
+            pass
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # En entorno serverless el lifespan puede fallar si la BD no está lista.
@@ -20,6 +63,7 @@ async def lifespan(app: FastAPI):
     try:
         async with engine.begin() as conn:
             await conn.run_sync(Base.metadata.create_all)
+        await ensure_employee_schema_compatibility()
         await seed_initial_data()
     except Exception as e:
         print(f"⚠️ ADVERTENCIA: No se pudo inicializar la BD al arrancar: {e}")
@@ -255,6 +299,7 @@ async def setup_db():
     try:
         async with engine.begin() as conn:
             await conn.run_sync(Base.metadata.create_all)
+        await ensure_employee_schema_compatibility()
         await seed_initial_data()
         return {"status": "success", "message": "Base de datos inicializada. Usa admin / 1234"}
     except Exception as e:
