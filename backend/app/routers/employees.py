@@ -186,24 +186,46 @@ async def upload_employees_csv(
     full_name,document_number,email,phone,location,hire_date,category_name,agent_type_name
     Juan Pérez,12345678,jperez@example.com,555-1234,T123:D63,2025-01-15,Full-time,MJ-F
     """
-    if not file.filename.endswith('.csv'):
+    if not (file.filename.endswith('.csv') or file.filename.endswith('.xlsx')):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="El archivo debe ser CSV"
+            detail="El archivo debe ser CSV o XLSX"
         )
 
-    # Leer el contenido del archivo
     content = await file.read()
-    try:
-        decoded_content = content.decode('utf-8')
-    except UnicodeDecodeError:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="El archivo debe estar en formato UTF-8"
-        )
+    csv_reader = []
 
-    # Parsear CSV
-    csv_reader = csv.DictReader(io.StringIO(decoded_content))
+    if file.filename.endswith('.xlsx'):
+        import openpyxl
+        import datetime
+        wb = openpyxl.load_workbook(io.BytesIO(content), data_only=True)
+        sheet = wb.active
+        
+        # Obtener encabezados
+        headers = [str(cell.value).strip() if cell.value else "" for cell in sheet[1]]
+        
+        for row in sheet.iter_rows(min_row=2, values_only=True):
+            if not any(row):
+                continue
+            row_dict = {}
+            for col_idx, header in enumerate(headers):
+                if header:
+                    val = row[col_idx]
+                    if isinstance(val, datetime.datetime):
+                        val = val.strftime('%Y-%m-%d')
+                    row_dict[header] = str(val).strip() if val is not None else ""
+            csv_reader.append(row_dict)
+    else:
+        # Parsear CSV
+        try:
+            decoded_content = content.decode('utf-8')
+        except UnicodeDecodeError:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="El archivo debe estar en formato UTF-8"
+            )
+        csv_reader_obj = csv.DictReader(io.StringIO(decoded_content))
+        csv_reader = list(csv_reader_obj)
     
     # Obtener mapeo de categorías y tipos de agente por nombre
     result = await db.execute(select(EmployeeCategory))
