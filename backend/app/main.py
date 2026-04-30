@@ -49,6 +49,9 @@ async def ensure_employee_schema_compatibility():
         if "location" not in columns:
             await conn.execute(text("ALTER TABLE employees ADD COLUMN location VARCHAR(150)"))
 
+        if "phone" not in columns:
+            await conn.execute(text("ALTER TABLE employees ADD COLUMN phone VARCHAR(30)"))
+
         try:
             await conn.execute(text("ALTER TABLE employees ALTER COLUMN full_name SET NOT NULL"))
         except Exception:
