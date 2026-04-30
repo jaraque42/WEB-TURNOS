@@ -457,7 +457,7 @@ function BulkImportModal({
   };
 
   // Form-based bulk create
-  type {
+  type EmployeeFormData = {
     full_name: string;
     document_number: string;
     email: string;
