@@ -146,9 +146,7 @@ async def get_employees(
         term = f"%{name_filter.strip()}%"
         query = query.where(
             or_(
-                Employee.first_name.ilike(term),
-                Employee.last_name.ilike(term),
-                (Employee.last_name + ", " + Employee.first_name).ilike(term),
+                Employee.full_name.ilike(term),
                 Employee.document_number.ilike(term),
                 Employee.email.ilike(term),
             )
@@ -189,12 +187,10 @@ async def create_employee(db: AsyncSession, data: EmployeeCreate) -> Employee:
             raise HTTPException(status_code=409, detail="Ese usuario ya está vinculado a otro empleado")
 
     emp = Employee(
-        first_name=data.first_name,
-        last_name=data.last_name,
+        full_name=data.full_name,
         email=data.email,
         document_number=data.document_number,
         phone=data.phone,
-        address=data.address,
         location=data.location,
         hire_date=data.hire_date,
         category_id=data.category_id,
@@ -394,12 +390,10 @@ async def bulk_create_employees(
                     continue
 
             emp = Employee(
-                first_name=emp_in.first_name,
-                last_name=emp_in.last_name,
+                full_name=emp_in.full_name,
                 email=emp_in.email,
                 document_number=emp_in.document_number,
                 phone=emp_in.phone,
-                address=emp_in.address,
                 hire_date=emp_in.hire_date,
                 category_id=emp_in.category_id,
                 agent_type_id=emp_in.agent_type_id,

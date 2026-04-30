@@ -66,12 +66,10 @@ export type EmployeeStatus = 'activo' | 'inactivo' | 'licencia' | 'suspendido';
 export interface Employee {
   id: string;
   employee_number: number;
-  first_name: string;
-  last_name: string;
+  full_name: string;
   email: string | null;
   document_number: string;
   phone: string | null;
-  address: string | null;
   location: string | null;
   hire_date: string;
   status: EmployeeStatus;

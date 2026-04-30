@@ -86,12 +86,10 @@ class LicenseOut(LicenseBase):
 
 # ─── Empleado ───────────────────────────────────────────
 class EmployeeCreate(BaseModel):
-    first_name: str = Field(..., max_length=100)
-    last_name: str = Field(..., max_length=100)
+    full_name: str = Field(..., max_length=200)
     email: Optional[str] = Field(None, max_length=255)
     document_number: str = Field(..., max_length=30)
     phone: Optional[str] = Field(None, max_length=30)
-    address: Optional[str] = Field(None, max_length=255)
     location: Optional[str] = Field(None, max_length=150)
     hire_date: date
     category_id: Optional[UUID] = None
@@ -100,12 +98,10 @@ class EmployeeCreate(BaseModel):
 
 
 class EmployeeUpdate(BaseModel):
-    first_name: Optional[str] = Field(None, max_length=100)
-    last_name: Optional[str] = Field(None, max_length=100)
+    full_name: Optional[str] = Field(None, max_length=200)
     email: Optional[str] = Field(None, max_length=255)
     document_number: Optional[str] = Field(None, max_length=30)
     phone: Optional[str] = Field(None, max_length=30)
-    address: Optional[str] = Field(None, max_length=255)
     location: Optional[str] = Field(None, max_length=150)
     hire_date: Optional[date] = None
     status: Optional[EmployeeStatus] = None
@@ -117,12 +113,10 @@ class EmployeeUpdate(BaseModel):
 class EmployeeOut(BaseModel):
     id: UUID
     employee_number: int
-    first_name: str
-    last_name: str
+    full_name: str
     email: Optional[str] = None
     document_number: str
     phone: Optional[str] = None
-    address: Optional[str] = None
     location: Optional[str] = None
     hire_date: date
     status: EmployeeStatus

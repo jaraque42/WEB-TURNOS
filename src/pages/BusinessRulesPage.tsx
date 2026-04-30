@@ -130,7 +130,7 @@ export default function BusinessRulesPage() {
             <AlertTriangle size={16} /> Incompatibilidad
           </button>
           <button className="btn btn-secondary" onClick={() => { setEditingCategory(null); setShowCategoryModal(true); }}>
-            <Plus size={16} /> Categoría
+            <Plus size={16} /> Puesto asignado
           </button>
           <button
             className="btn btn-secondary"
@@ -138,7 +138,7 @@ export default function BusinessRulesPage() {
             disabled={!canCreateAgentType}
             title={!canCreateAgentType ? 'Sin permiso para crear tipos de agente' : undefined}
           >
-            <Plus size={16} /> Tipo de agente
+            <Plus size={16} /> Tipo de contrato
           </button>
           <button className="btn btn-primary" onClick={() => { setEditingRule(null); setShowRuleModal(true); }}>
             <Plus size={16} /> Nueva regla
@@ -149,7 +149,7 @@ export default function BusinessRulesPage() {
         {/* Categories */}
         <div className="card" style={{ marginBottom: '1.5rem' }}>
           <div className="card-header">
-            <h2 className="card-title">Categorías de empleado</h2>
+            <h2 className="card-title">Puestos asignados</h2>
           </div>
           {categories && categories.length > 0 ? (
             <div className="table-wrapper">
@@ -179,7 +179,7 @@ export default function BusinessRulesPage() {
                           </button>
                           <button
                             className="btn btn-icon btn-danger btn-sm"
-                            onClick={() => { if (confirm('¿Eliminar categoría?')) deleteCategoryMut.mutate(c.id); }}
+                            onClick={() => { if (confirm('¿Eliminar puesto?')) deleteCategoryMut.mutate(c.id); }}
                           >
                             <Trash2 size={14} />
                           </button>
@@ -198,7 +198,7 @@ export default function BusinessRulesPage() {
         {/* Agent types */}
         <div className="card" style={{ marginBottom: '1.5rem' }}>
           <div className="card-header">
-            <h2 className="card-title">Tipos de agente</h2>
+            <h2 className="card-title">Tipos de contrato</h2>
           </div>
           {agentTypes && agentTypes.length > 0 ? (
             <div className="table-wrapper">
@@ -233,7 +233,7 @@ export default function BusinessRulesPage() {
                           </button>
                           <button
                             className="btn btn-icon btn-danger btn-sm"
-                            onClick={() => { if (confirm('¿Eliminar tipo de agente?')) deleteAgentTypeMut.mutate(a.id); }}
+                            onClick={() => { if (confirm('¿Eliminar tipo de contrato?')) deleteAgentTypeMut.mutate(a.id); }}
                             disabled={!canDeleteAgentType}
                             title={!canDeleteAgentType ? 'Sin permiso para eliminar tipos de agente' : undefined}
                           >
@@ -416,7 +416,7 @@ function CategoryModal({
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
-          <h2 className="modal-title">{category ? 'Editar categoría' : 'Nueva categoría'}</h2>
+          <h2 className="modal-title">{category ? 'Editar puesto' : 'Nuevo puesto'}</h2>
           <button className="btn btn-icon btn-secondary btn-sm" onClick={onClose}><X size={16} /></button>
         </div>
         {error && <div className="error-msg">{error}</div>}
@@ -482,7 +482,7 @@ function AgentTypeModal({
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
-          <h2 className="modal-title">{agentType ? 'Editar tipo de agente' : 'Nuevo tipo de agente'}</h2>
+          <h2 className="modal-title">{agentType ? 'Editar tipo de contrato' : 'Nuevo tipo de contrato'}</h2>
           <button className="btn btn-icon btn-secondary btn-sm" onClick={onClose}><X size={16} /></button>
         </div>
         {error && <div className="error-msg">{error}</div>}
@@ -586,7 +586,7 @@ function RuleModal({
         </div>
         <div className="form-grid">
           <div className="form-group">
-            <label className="form-label">Categoría</label>
+            <label className="form-label">Puesto asignado</label>
             <select className="form-select" value={form.category} onChange={(e) => handleChange('category', e.target.value)}>
               <option value="horas">Horas</option>
               <option value="dias_consecutivos">Días consecutivos</option>
@@ -601,9 +601,9 @@ function RuleModal({
           </div>
         </div>
         <div className="form-group">
-          <label className="form-label">Aplica a categoría</label>
+          <label className="form-label">Aplica a puesto</label>
           <select className="form-select" value={form.employee_category_id} onChange={(e) => handleChange('employee_category_id', e.target.value)}>
-            <option value="">Todas las categorías</option>
+            <option value="">Todos los puestos</option>
             {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
           </select>
         </div>

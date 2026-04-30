@@ -42,7 +42,7 @@ def _enrich_assignment(a) -> dict:
         "shift_type_code": None,
     }
     if a.employee:
-        data["employee_name"] = f"{a.employee.last_name}, {a.employee.first_name}"
+        data["employee_name"] = a.employee.full_name if a.employee else None
     if a.shift_type:
         data["shift_type_name"] = a.shift_type.name
         data["shift_type_code"] = a.shift_type.code

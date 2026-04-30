@@ -296,7 +296,7 @@ async def bulk_delete_assignments(
             continue
         if assignment.status == AssignmentStatus.COMPLETED:
             skipped += 1
-            emp_name = f"{assignment.employee.last_name}, {assignment.employee.first_name}" if assignment.employee else str(aid)
+            emp_name = assignment.employee.full_name if assignment.employee else str(aid)
             details.append(f"{emp_name} ({assignment.date}): completada, no se puede eliminar")
             continue
         await db.delete(assignment)

@@ -147,9 +147,10 @@ export default function EmployeesPage() {
                     <th>ID</th>
                     <th>Nombre completo</th>
                     <th>Email</th>
+                    <th>Teléfono</th>
                     <th>Documento</th>
-                    <th>Categoría</th>
-                    <th>Tipo agente</th>
+                    <th>Puesto asignado</th>
+                    <th>Tipo contrato</th>
                     <th>Estado</th>
                     <th style={{ width: 140 }}>Acciones</th>
                   </tr>
@@ -187,10 +188,11 @@ export default function EmployeesPage() {
                             onClick={() => openEmployeeCalendar(e.id)}
                             title="Ver calendario del empleado"
                           >
-                            {e.last_name}, {e.first_name}
+                            {e.full_name}
                           </button>
                         </td>
                         <td>{e.email ?? '—'}</td>
+                        <td>{e.phone ?? '—'}</td>
                         <td>{e.document_number}</td>
                         <td>{e.category?.name ?? '—'}</td>
                         <td>{e.agent_type?.name ?? '—'}</td>
@@ -265,12 +267,10 @@ function EmployeeModal({
   const isEdit = !!employee;
 
   const [form, setForm] = useState({
-    first_name: employee?.first_name ?? '',
-    last_name: employee?.last_name ?? '',
+    full_name: employee?.full_name ?? '',
     email: employee?.email ?? '',
     document_number: employee?.document_number ?? '',
     phone: employee?.phone ?? '',
-    address: employee?.address ?? '',
     hire_date: employee?.hire_date?.slice(0, 10) ?? new Date().toISOString().slice(0, 10),
     category_id: employee?.category_id ?? '',
     agent_type_id: employee?.agent_type_id ?? '',
@@ -293,7 +293,6 @@ function EmployeeModal({
       const payload: Record<string, unknown> = { ...data };
       // Convertir strings vacíos en null para campos opcionales
       if (!payload.phone) payload.phone = null;
-      if (!payload.address) payload.address = null;
       if (!payload.email) payload.email = null;
       if (!payload.category_id) payload.category_id = null;
       if (!payload.agent_type_id) payload.agent_type_id = null;
@@ -326,13 +325,9 @@ function EmployeeModal({
         {error && <div className="error-msg">{error}</div>}
 
         <div className="form-grid">
-          <div className="form-group">
-            <label className="form-label">Nombre</label>
-            <input className="form-input" value={form.first_name} onChange={(e) => handleChange('first_name', e.target.value)} required />
-          </div>
-          <div className="form-group">
-            <label className="form-label">Apellido</label>
-            <input className="form-input" value={form.last_name} onChange={(e) => handleChange('last_name', e.target.value)} required />
+          <div className="form-group" style={{ gridColumn: 'span 2' }}>
+            <label className="form-label">Nombre completo</label>
+            <input className="form-input" value={form.full_name} onChange={(e) => handleChange('full_name', e.target.value)} required />
           </div>
           <div className="form-group">
             <label className="form-label">Email</label>
@@ -345,10 +340,6 @@ function EmployeeModal({
           <div className="form-group">
             <label className="form-label">Teléfono</label>
             <input className="form-input" value={form.phone} onChange={(e) => handleChange('phone', e.target.value)} />
-          </div>
-          <div className="form-group">
-            <label className="form-label">Dirección</label>
-            <input className="form-input" value={form.address} onChange={(e) => handleChange('address', e.target.value)} />
           </div>
           <div className="form-group">
             <label className="form-label">Terminal <span style={{ fontWeight: 400, color: 'var(--gray-400)' }}>(opcional)</span></label>
@@ -386,14 +377,14 @@ function EmployeeModal({
             <input className="form-input" type="date" value={form.hire_date} onChange={(e) => handleChange('hire_date', e.target.value)} />
           </div>
           <div className="form-group">
-            <label className="form-label">Categoría</label>
+            <label className="form-label">Puesto asignado</label>
             <select className="form-select" value={form.category_id} onChange={(e) => handleChange('category_id', e.target.value)}>
-              <option value="">— Sin categoría —</option>
+              <option value="">— Sin puesto —</option>
               {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
             </select>
           </div>
           <div className="form-group">
-            <label className="form-label">Tipo de agente</label>
+            <label className="form-label">Tipo de contrato</label>
             <select className="form-select" value={form.agent_type_id} onChange={(e) => handleChange('agent_type_id', e.target.value)}>
               <option value="">— Sin tipo —</option>
               {agentTypes.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
@@ -466,13 +457,11 @@ function BulkImportModal({
   };
 
   // Form-based bulk create
-  type EmployeeFormData = {
-    first_name: string;
-    last_name: string;
+  type {
+    full_name: string;
     document_number: string;
     email: string;
     phone: string;
-    address: string;
     location: string;
     hire_date: string;
     category_id: string;
@@ -480,19 +469,17 @@ function BulkImportModal({
   };
 
   const [formEmployees, setFormEmployees] = useState<EmployeeFormData[]>([
-    { first_name: '', last_name: '', document_number: '', email: '', phone: '', address: '', location: '', hire_date: '', category_id: '', agent_type_id: '' },
-    { first_name: '', last_name: '', document_number: '', email: '', phone: '', address: '', location: '', hire_date: '', category_id: '', agent_type_id: '' },
-    { first_name: '', last_name: '', document_number: '', email: '', phone: '', address: '', location: '', hire_date: '', category_id: '', agent_type_id: '' },
+    { full_name: '', document_number: '', email: '', phone: '', location: '', hire_date: '', category_id: '', agent_type_id: '' },
+    { full_name: '', document_number: '', email: '', phone: '', location: '', hire_date: '', category_id: '', agent_type_id: '' },
+    { full_name: '', document_number: '', email: '', phone: '', location: '', hire_date: '', category_id: '', agent_type_id: '' },
   ]);
 
   const formMutation = useMutation({
     mutationFn: (employees: Array<{
-      first_name: string;
-      last_name: string;
+      full_name: string;
       document_number: string;
       email: string | null;
       phone: string | null;
-      address: string | null;
       location: string | null;
       hire_date: string;
       category_id: string | null;
@@ -507,7 +494,7 @@ function BulkImportModal({
   });
 
   const handleFormSubmit = () => {
-    const filledEmployees = formEmployees.filter(e => e.first_name && e.last_name && e.document_number && e.hire_date);
+    const filledEmployees = formEmployees.filter(e => e.full_name && e.document_number && e.hire_date);
     if (filledEmployees.length === 0) {
       setError('Completa al menos un empleado');
       return;
@@ -519,13 +506,12 @@ function BulkImportModal({
       agent_type_id: e.agent_type_id || null,
       email: e.email || null,
       phone: e.phone || null,
-      address: e.address || null,
       location: e.location || null,
     })));
   };
 
   const addFormEmployee = () => {
-    setFormEmployees([...formEmployees, { first_name: '', last_name: '', document_number: '', email: '', phone: '', address: '', location: '', hire_date: '', category_id: '', agent_type_id: '' }]);
+    setFormEmployees([...formEmployees, { full_name: '', document_number: '', email: '', phone: '', location: '', hire_date: '', category_id: '', agent_type_id: '' }]);
   };
 
   const removeFormEmployee = (idx: number) => {
@@ -622,9 +608,9 @@ function BulkImportModal({
               Sube un archivo CSV con el siguiente formato:
             </p>
             <pre style={{ background: '#f5f5f5', padding: '1rem', borderRadius: '4px', fontSize: '0.85rem', overflowX: 'auto' }}>
-{`first_name,last_name,document_number,email,phone,address,location,hire_date,category_name,agent_type_name
-Juan,Pérez,12345678,jperez@example.com,555-1234,Calle 123,T123:D63,2025-01-15,Full-time,MJ-F
-María,García,87654321,mgarcia@example.com,555-5678,Av Principal 456,T4:PISTA,2025-02-01,Part-time,JC-FD`}
+{`full_name,document_number,email,phone,location,hire_date,category_name,agent_type_name
+Juan Pérez,12345678,jperez@example.com,555-1234,T123:D63,2025-01-15,Full-time,MJ-F
+María García,87654321,mgarcia@example.com,555-5678,T4:PISTA,2025-02-01,Part-time,JC-FD`}
             </pre>
 
             <div className="form-group" style={{ marginTop: '1.5rem' }}>
@@ -654,22 +640,13 @@ María,García,87654321,mgarcia@example.com,555-5678,Av Principal 456,T4:PISTA,2
                 </div>
 
                 <div className="form-grid" style={{ gridTemplateColumns: 'repeat(3, 1fr)' }}>
-                  <div className="form-group">
-                    <label className="form-label">Nombre</label>
+                  <div className="form-group" style={{ gridColumn: 'span 2' }}>
+                    <label className="form-label">Nombre completo</label>
                     <input
                       className="form-input"
-                      value={emp.first_name}
-                      onChange={(e) => updateFormEmployee(idx, 'first_name', e.target.value)}
-                      placeholder="Juan"
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label className="form-label">Apellido</label>
-                    <input
-                      className="form-input"
-                      value={emp.last_name}
-                      onChange={(e) => updateFormEmployee(idx, 'last_name', e.target.value)}
-                      placeholder="Pérez"
+                      value={emp.full_name}
+                      onChange={(e) => updateFormEmployee(idx, 'full_name', e.target.value)}
+                      placeholder="Juan Pérez"
                     />
                   </div>
                   <div className="form-group">
@@ -709,15 +686,6 @@ María,García,87654321,mgarcia@example.com,555-5678,Av Principal 456,T4:PISTA,2
                       onChange={(e) => updateFormEmployee(idx, 'hire_date', e.target.value)}
                     />
                   </div>
-                  <div className="form-group" style={{ gridColumn: 'span 3' }}>
-                    <label className="form-label">Dirección</label>
-                    <input
-                      className="form-input"
-                      value={emp.address}
-                      onChange={(e) => updateFormEmployee(idx, 'address', e.target.value)}
-                      placeholder="Calle 123"
-                    />
-                  </div>
                   <div className="form-group">
                     <label className="form-label">Ubicación</label>
                     <select
@@ -732,20 +700,20 @@ María,García,87654321,mgarcia@example.com,555-5678,Av Principal 456,T4:PISTA,2
                     </select>
                   </div>
                   <div className="form-group">
-                    <label className="form-label">Categoría</label>
+                    <label className="form-label">Puesto asignado</label>
                     <select
                       className="form-select"
                       value={emp.category_id}
                       onChange={(e) => updateFormEmployee(idx, 'category_id', e.target.value)}
                     >
-                      <option value="">Sin categoría</option>
+                      <option value="">Sin puesto</option>
                       {categories.map((c) => (
                         <option key={c.id} value={c.id}>{c.name}</option>
                       ))}
                     </select>
                   </div>
                   <div className="form-group">
-                    <label className="form-label">Tipo de agente</label>
+                    <label className="form-label">Tipo de contrato</label>
                     <select
                       className="form-select"
                       value={emp.agent_type_id}

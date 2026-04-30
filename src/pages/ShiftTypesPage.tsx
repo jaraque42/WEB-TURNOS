@@ -641,13 +641,13 @@ function AssignEmployeesModal({
             </div>
             
             <div className="form-group">
-              <label className="form-label">Filtrar por categoría</label>
+              <label className="form-label">Filtrar por puesto</label>
               <select
                 className="form-select"
                 value={selectedCategoryId}
                 onChange={(e) => setSelectedCategoryId(e.target.value)}
               >
-                <option value="">Todas las categorías</option>
+                <option value="">Todos los puestos</option>
                 {categories?.map((cat) => (
                   <option key={cat.id} value={cat.id}>{cat.name}</option>
                 ))}
@@ -771,7 +771,7 @@ function AssignEmployeesModal({
                       />
                     </th>
                     <th style={{ padding: '0.5rem', textAlign: 'left' }}>Nombre</th>
-                    <th style={{ padding: '0.5rem', textAlign: 'left' }}>Categoría</th>
+                    <th style={{ padding: '0.5rem', textAlign: 'left' }}>Puesto asignado</th>
                     <th style={{ padding: '0.5rem', textAlign: 'left' }}>Tipo agente</th>
                   </tr>
                 </thead>
@@ -793,7 +793,7 @@ function AssignEmployeesModal({
                         />
                       </td>
                       <td style={{ padding: '0.5rem' }}>
-                        <strong>{emp.first_name} {emp.last_name}</strong>
+                        <strong>{emp.full_name}</strong>
                         <div style={{ fontSize: '0.8rem', color: 'var(--gray-500)' }}>
                           {emp.document_number}
                         </div>
@@ -802,7 +802,7 @@ function AssignEmployeesModal({
                         {emp.category ? (
                           <span className="badge badge-blue">{emp.category.name}</span>
                         ) : (
-                          <span className="badge badge-gray">Sin categoría</span>
+                          <span className="badge badge-gray">Sin puesto</span>
                         )}
                       </td>
                       <td style={{ padding: '0.5rem' }}>
@@ -818,7 +818,7 @@ function AssignEmployeesModal({
               </table>
             ) : (
               <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--gray-500)' }}>
-                No hay empleados activos{selectedCategoryId ? ' en esta categoría' : ''}
+                No hay empleados activos{selectedCategoryId ? ' en este puesto' : ''}
               </div>
             )}
           </div>

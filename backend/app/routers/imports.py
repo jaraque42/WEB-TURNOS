@@ -296,12 +296,12 @@ async def forecasts_summary(
         q = (
             select(
                 ShiftAssignment.date.label("d"),
-                (Employee.last_name + ", " + Employee.first_name).label("g"),
+                (Employee.full_name).label("g"),
                 func.count(ShiftAssignment.id).label("value"),
             )
             .join(Employee, Employee.id == ShiftAssignment.employee_id)
             .where((ShiftAssignment.date >= date_from) & (ShiftAssignment.date <= date_to))
-            .group_by(ShiftAssignment.date, Employee.last_name, Employee.first_name)
+            .group_by(ShiftAssignment.date, Employee.full_name)
             .order_by(ShiftAssignment.date)
         )
 

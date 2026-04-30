@@ -241,9 +241,9 @@ export default function AssignmentsPage() {
             value={categoryFilter}
             onChange={(e) => setCategoryFilter(e.target.value)}
             style={{ width: 190 }}
-            title="Filtrar por categoría"
+            title="Filtrar por puesto asignado"
           >
-            <option value="">Todas las categorías</option>
+            <option value="">Todos los puestos</option>
             {categories?.map((cat) => (
               <option key={cat.id} value={cat.id}>{cat.name}</option>
             ))}
@@ -264,7 +264,7 @@ export default function AssignmentsPage() {
             <>
               <span style={{ fontSize: '0.82rem', color: 'var(--gray-600)' }}>
                 {filteredEmployee
-                  ? `Empleado: ${filteredEmployee.last_name}, ${filteredEmployee.first_name}`
+                  ? `Empleado: ${filteredEmployee.full_name}`
                   : 'Empleado filtrado'}
               </span>
               <button className="btn btn-secondary btn-sm" onClick={() => navigate('/assignments')}>
@@ -860,13 +860,13 @@ function CreateAssignmentModal({
 
         {/* Filtro por categoría */}
         <div className="form-group">
-          <label className="form-label">Filtrar por categoría</label>
+          <label className="form-label">Filtrar por puesto</label>
           <select
             className="form-select"
             value={filterCategoryId}
             onChange={(e) => setFilterCategoryId(e.target.value)}
           >
-            <option value="">Todas las categorías</option>
+            <option value="">Todos los puestos</option>
             {categories?.map((cat) => (
               <option key={cat.id} value={cat.id}>{cat.name}</option>
             ))}
@@ -910,11 +910,11 @@ function CreateAssignmentModal({
                   onChange={() => toggleEmployee(emp.id)}
                 />
                 <span style={{ fontWeight: 500 }}>{emp.employee_number}</span>
-                <span style={{ color: 'var(--gray-600)' }}>— {emp.last_name}, {emp.first_name}</span>
+                <span style={{ color: 'var(--gray-600)' }}>— {emp.full_name}</span>
                 {emp.category && <span className="badge badge-blue" style={{ fontSize: '0.7rem', marginLeft: 'auto' }}>{emp.category.name}</span>}
               </label>
             )) : (
-              <div style={{ padding: '0.5rem', color: 'var(--gray-400)', fontSize: '0.82rem' }}>No hay empleados activos{filterCategoryId ? ' en esta categoría' : ''}</div>
+              <div style={{ padding: '0.5rem', color: 'var(--gray-400)', fontSize: '0.82rem' }}>No hay empleados activos{filterCategoryId ? ' en este puesto' : ''}</div>
             )}
           </div>
         </div>

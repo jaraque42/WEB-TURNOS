@@ -76,12 +76,10 @@ class Employee(Base):
         Integer, employee_id_seq, server_default=employee_id_seq.next_value(),
         unique=True, nullable=False, index=True,
     )
-    first_name = Column(String(100), nullable=False)
-    last_name = Column(String(100), nullable=False)
+    full_name = Column(String(200), nullable=False)
     email = Column(String(255), nullable=True)
     document_number = Column(String(30), unique=True, nullable=False, index=True)
     phone = Column(String(30), nullable=True)
-    address = Column(String(255), nullable=True)
     location = Column(String(150), nullable=True)
     hire_date = Column(Date, nullable=False)
     status = Column(

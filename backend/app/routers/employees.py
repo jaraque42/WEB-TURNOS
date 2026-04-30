@@ -183,8 +183,8 @@ async def upload_employees_csv(
 ):
     """
     Subir un CSV con empleados. Formato esperado:
-    first_name,last_name,document_number,email,phone,address,location,hire_date,category_name,agent_type_name
-    Juan,Pérez,12345678,jperez@example.com,555-1234,Calle 123,T123:D63,2025-01-15,Full-time,MJ-F
+    full_name,document_number,email,phone,location,hire_date,category_name,agent_type_name
+    Juan Pérez,12345678,jperez@example.com,555-1234,T123:D63,2025-01-15,Full-time,MJ-F
     """
     if not file.filename.endswith('.csv'):
         raise HTTPException(
@@ -218,7 +218,7 @@ async def upload_employees_csv(
     for idx, row in enumerate(csv_reader, start=2):  # start=2 porque la fila 1 es el encabezado
         try:
             # Validar campos requeridos
-            required_fields = ['first_name', 'last_name', 'document_number', 'hire_date']
+            required_fields = ['full_name', 'document_number', 'hire_date']
             missing = [f for f in required_fields if not row.get(f)]
             if missing:
                 parse_errors.append(f"Fila {idx}: Faltan campos: {', '.join(missing)}")
@@ -250,12 +250,10 @@ async def upload_employees_csv(
                     continue
 
             employees_to_create.append(EmployeeCreate(
-                first_name=row['first_name'].strip(),
-                last_name=row['last_name'].strip(),
+                full_name=row['full_name'].strip(),
                 document_number=row['document_number'].strip(),
                 email=row.get('email', '').strip() or None,
                 phone=row.get('phone', '').strip() or None,
-                address=row.get('address', '').strip() or None,
                 location=row.get('location', '').strip() or None,
                 hire_date=hire_date,
                 category_id=category_id,
