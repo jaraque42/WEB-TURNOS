@@ -477,7 +477,7 @@ function BulkImportModal({
               cursor: 'pointer',
             }}
           >
-            Subir archivo
+            Subir CSV
           </button>
           <button
             onClick={() => setTab('form')}
@@ -499,7 +499,7 @@ function BulkImportModal({
         {tab === 'csv' && (
           <div style={{ padding: '1.5rem' }}>
             <p style={{ marginBottom: '1rem', fontSize: '0.9rem', color: '#666' }}>
-              Sube un archivo CSV o Excel (.xlsx) con el siguiente formato:
+              Sube un archivo CSV con el siguiente formato:
             </p>
             <pre style={{ background: '#f5f5f5', padding: '1rem', borderRadius: '4px', fontSize: '0.85rem', overflowX: 'auto' }}>
 {`username,email,full_name,password,role_name,is_superuser
@@ -508,10 +508,10 @@ mgarcia,mgarcia@example.com,María García,Pass1234,Operador,false`}
             </pre>
 
             <div className="form-group" style={{ marginTop: '1.5rem' }}>
-              <label className="form-label">Archivo CSV / Excel</label>
+              <label className="form-label">Archivo CSV</label>
               <input
                 type="file"
-                accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
+                accept=".csv"
                 className="form-input"
                 onChange={(e) => setCsvFile(e.target.files?.[0] ?? null)}
               />
@@ -609,7 +609,7 @@ mgarcia,mgarcia@example.com,María García,Pass1234,Operador,false`}
           <button className="btn btn-secondary" onClick={onClose}>Cancelar</button>
           {tab === 'csv' ? (
             <button className="btn btn-primary" onClick={handleCsvSubmit} disabled={csvMutation.isPending || !csvFile}>
-              {csvMutation.isPending ? <span className="spinner" /> : 'Importar archivo'}
+              {csvMutation.isPending ? <span className="spinner" /> : 'Importar CSV'}
             </button>
           ) : (
             <button className="btn btn-primary" onClick={handleFormSubmit} disabled={formMutation.isPending}>

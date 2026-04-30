@@ -1,4 +1,0 @@
-username,email,full_name,password,role_name,is_superuser
-admin_test,admin@example.com,Admin de Prueba,Pass1234,admin,true
-operador1,operador1@example.com,Operador Uno,Pass1234,operador,false
-supervisor1,supervisor1@example.com,Supervisor Uno,Pass1234,supervisor,false
